@@ -3,7 +3,9 @@
 # http://stackoverflow.com/questions/11624190/python-convert-string-to-byte-array
 # http://stackoverflow.com/questions/2611858/struct-error-unpack-requires-a-string-argument-of-length-4
 import struct
-from commonUtil import *
+import sys
+sys.path.append("..\src")
+from core.commonUtil import *
 
 def encode(value, width=1): 
     """

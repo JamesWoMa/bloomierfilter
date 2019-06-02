@@ -17,16 +17,19 @@ class BloomierFilter:
         self.hasher = BloomierHasher(hashSeed, m, k, q)
         self.byteSize = getByteSize(q)
         
-        oamf = OrderAndMatchFinder(hashSeed, keysDict, m, k, q)
-        oam =  oamf.find()
+        # oamf = OrderAndMatchFinder(hashSeed, keysDict, m, k, q)
+        # oam =  oamf.find()
         
         ## TODO - this can be just bytearray 
         self.table = [[0] * self.byteSize] * m
         self.valueTable = [0] * m
         self.slotEmpty = [0] * m # originally all the slots are empty
 
-        if useTable is False:
-            self.create(keysDict, oam)
+        # for key in keysDict:
+        #     insert(key, keysDict[key])
+
+        # if useTable is False:
+        #     self.create(keysDict, oam)
         
     def getTable(self): return self.table
     def setTable(self, table): self.table = table

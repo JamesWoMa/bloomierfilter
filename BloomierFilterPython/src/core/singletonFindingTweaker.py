@@ -1,4 +1,6 @@
-from bloomierHasher import *
+import sys
+sys.path.append("..\src")
+from core.bloomierHasher import *
 PRINT = False
 
 class SingletonFindingTweaker:

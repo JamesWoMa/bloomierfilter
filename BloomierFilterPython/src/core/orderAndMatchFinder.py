@@ -1,10 +1,10 @@
-from bloomierHasher import *
-from orderAndMatch import *
-from copy import *
-from singletonFindingTweaker import *
-from util import *
 import sys
-
+sys.path.append("..\src")
+from core.bloomierHasher import *
+from core.orderAndMatch import *
+from copy import *
+from core.singletonFindingTweaker import *
+from core.util import *
 class OrderAndMatchFinder:
     # def __init__(self, hashSeed, keysDict, m, k, q, maxTry = 5)
     # removes the maxTry is None part code ???

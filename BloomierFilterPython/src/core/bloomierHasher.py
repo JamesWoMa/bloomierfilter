@@ -1,6 +1,8 @@
 from random import Random
-from hash import *
-from util import *
+import sys
+sys.path.append("..\src")
+from core.util import *
+from core.hash import *
 
 class BloomierHasher:
     def __init__(self, hashSeed, m, k, q):
