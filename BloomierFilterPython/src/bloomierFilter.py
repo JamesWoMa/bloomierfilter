@@ -5,6 +5,7 @@ from core.orderAndMatch import *
 from core.orderAndMatchFinder import *
 from core.utilEncode import *
 from core.util import *
+import numpy as np
 
 class BloomierFilter:
     def __init__(self, hashSeed, keysDict, m, k, q, useTable = False):
@@ -22,6 +23,7 @@ class BloomierFilter:
         ## TODO - this can be just bytearray 
         self.table = [[0] * self.byteSize] * m
         self.valueTable = [0] * m
+        self.slotEmpty = [0] * m # originally all the slots are empty
 
         if useTable is False:
             self.create(keysDict, oam)
@@ -30,6 +32,7 @@ class BloomierFilter:
     def setTable(self, table): self.table = table
     def getValueTable(self): return self.valueTable
     def setValueTable(self, table): self.valueTable = table
+    def getEmptyTable(self): return self.slotEmpty
         
     def xorOperations(self, value, M, neighbors):
         #value = [0] * self.byteSize
@@ -40,6 +43,41 @@ class BloomierFilter:
             byteArrayXor(value, self.table[v])
         
         return value
+
+    def insert(self, key, value):
+        singletonFound = False
+        neighbors = self.hasher.getNeighborhood(key)
+        for i, v in enumerate(neighbors):
+            if self.slotEmpty[v] == 0: # 0 is empty
+                l = i
+                singletonFound = True
+
+        if singletonFound:
+            mask = self.hasher.getM(key)
+            L = neighbors[l] #l is the index in the neighbors array; L is the index in "table"
+                
+            encodeValue = encode(l, self.byteSize)
+            valueToStore = [0] * self.byteSize
+                
+            byteArrayXor(valueToStore, encodeValue)
+            byteArrayXor(valueToStore, mask)
+                
+            for i, v in enumerate(neighbors):
+                if i == l:
+                    pass
+                else:
+                    # The h_value in the table should be applied
+                    byteArrayXor(valueToStore, self.table[v])
+                    self.slotEmpty[v] = 1
+
+                self.table[L] = valueToStore
+                self.valueTable[L] = value
+                self.slotEmpty[L] = 1
+        return singletonFound
+        # if not empty:
+        #     print ("this one has no singleton")
+        # print (np.sum(self.slotEmpty), len(self.slotEmpty))
+
         
     def get(self, key):
         neighbors = self.hasher.getNeighborhood(key)
@@ -85,7 +123,7 @@ class BloomierFilter:
             key = pi
             value = map[key]
             #print value
-            neighbors = self.hasher.getNeighborhood(key)
+            neighbors = self.hasher.getNeighborhood(key) # these are all the hashed values (indices)
             mask = self.hasher.getM(key)
             l = tauList[i] # tauList contains the iota values
             L = neighbors[l]
@@ -102,9 +140,15 @@ class BloomierFilter:
                 else:
                     # The h_value in the table should be applied
                     byteArrayXor(valueToStore, self.table[v])
+                    self.slotEmpty[v] = 1
 
             self.table[L] = valueToStore
             self.valueTable[L] = value
+            self.slotEmpty[L] = 1
+        # print (self.slotEmpty)
+        # print (self.valueTable)
+        # # print (self.slotEmpty)
+        # print (self.table)
         #print self.valueTable
         
     def table2string(self):

@@ -93,7 +93,7 @@ class TestBloomierFilter(unittest.TestCase):
 
         for seed in [2]:
           print(seed)
-          fps = []
+          insFails = []
           times = []
           for value_k in values_k:
             start = timeit.default_timer()
@@ -101,35 +101,30 @@ class TestBloomierFilter(unittest.TestCase):
             m = int(len(k)*value_k*c) # # len(k) * 1.5 len(k) * 1.1
 
             bf = BloomierFilter(seed, k, m, value_k, 16)
-            stop = timeit.default_timer()
-            times.append(stop-start)
-            for i in range(num_elems):
-                self.assertEqual(bf.get(str(i)), i)
+            # stop = timeit.default_timer()
+            # times.append(stop-start)
+            # for i in range(num_elems):    
+            #     self.assertEqual(bf.get(str(i)), i)
 
             if FILTER_TEST:
-                #false positive
-                falsePositive = 0
+                #insertions that failed
+                insertionFails = 0
                 for i in range(num_elems, num_false_check):
                     #print bf.get(str(i))
-                    if bf.get(str(i)) is not None:
-                        falsePositive += 1
-                print("# of False positive %d: %f%%" % (falsePositive, 100.0*falsePositive/(num_false_check - num_elems)))
-                fps.append(falsePositive/(num_false_check - num_elems))
-          plt.figure(1)
-          plt.plot(values_k, fps)
-          plt.figure(2)
-          plt.plot(values_k, times)
-        plt.figure(1)
-        plt.title('False Positive Rate for Various k')
-        plt.xlabel('k value')
-        plt.ylabel('False Positive Rate')
-        plt.savefig('ckn_k_false_positive.png')
+                    if bf.insert(str(i), i) is False:
+                        insertionFails += 1
+                print("# of InsertionFails %d: %f%%" % (insertionFails, 100.0*insertionFails/(num_false_check - num_elems)))
+                print ("size of array", m, len(bf.getTable()))
+                insFails.append(insertionFails/(num_false_check - num_elems))
+        # plt.plot(values_k, insFails)
+        # plt.title('Insertion new Elem Fail Rate for Various k')
+        # plt.xlabel('k value')
+        # plt.ylabel('Insertion new Elem Fail Rate')
+        # plt.savefig('linear_k_insertion_fails_with_actual_insertion.png')
 
-        plt.figure(2)
-        plt.title('Build Time for Various k')
-        plt.xlabel('k value')
-        plt.ylabel('Time to build (seconds)')
-        plt.savefig('ckn_k_build_time.png')
+
+      
+
 
     def atest_givenTable(self):
         bfGiven = self.test_simple()
