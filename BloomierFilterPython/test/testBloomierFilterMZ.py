@@ -67,6 +67,7 @@ class TestBloomierFilter(unittest.TestCase):
 
 
     def testBloom_BloomierFilter(self):
+        global SEED_INDEX
         # hashSeed, keysDict, m, k, q
         # m should be multiple of the size m
         # k
@@ -80,8 +81,8 @@ class TestBloomierFilter(unittest.TestCase):
 
         #- ---------------------------------------------------------------------------------------------
 
-        seeds = [0, 1, 2, 4, 5, 6, 7, 11, 12, 13, 14, 15]
-        seed_index = 0
+        seeds = [0, 67, 72, 93, 83, 0, 13, 14, 34, 6, 7, 12]
+        # seeds = [0, 14, 1, 4, 5, 6, 7, 11, 12, 3, 13, 15]
 
         num_elems = 100000
 
@@ -90,7 +91,7 @@ class TestBloomierFilter(unittest.TestCase):
         for i in range(num_elems):
             keysDict[str(i)] = i
 
-        values_k = range(2, 16)
+        values_k = range(2, 15)
         c = 2
 
       
@@ -101,14 +102,13 @@ class TestBloomierFilter(unittest.TestCase):
 
             m = int(1000*value_k*c) # # len(k) * 1.5 len(k) * 1.1
             SEED_INDEX = 0
-            num_bfs = 0
             bloomiers = []
             blooms = []
             bloomier = BloomierFilter(seeds[SEED_INDEX], keysDict, m, value_k, 16)
             bloom = BloomFilter(capacity=m, error_rate=0.001)
             bloomiers.append(bloomier)
             blooms.append(bloom)
-            seed_index += 1
+            SEED_INDEX += 1
 
             inserted = 0
             final = 0
@@ -118,6 +118,9 @@ class TestBloomierFilter(unittest.TestCase):
                     break
                 else:
                     inserted += 1
+                # if inserted % 1000 == 0:
+                #     print (inserted)
+                #     print (SEED_INDEX)
 
             # check correct insertions
             for i, key in enumerate(keysDict):
@@ -138,7 +141,7 @@ class TestBloomierFilter(unittest.TestCase):
         plt.title('Number of Insertions Within 10 Bloom-Bloomier Structures')
         plt.xlabel('k value (number of hash functions); number of buckets is m = 2000*k (both Bloom & Bloomier)')
         plt.ylabel('Number of Insertions Within 10 Bloom-Bloomier Structures')
-        plt.savefig('linear_k_num_ins_in_10_bloom_bloomier.png')
+        plt.savefig('linear_k_num_ins_in_10_bloom_bloomier2.png')
 
 
 if __name__ == "__main__":
