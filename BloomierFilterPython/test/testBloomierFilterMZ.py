@@ -4,7 +4,7 @@ import zlib
 from matplotlib import pyplot as plt
 from pybloom import *
 import timeit
-sys.path.append("..\src")
+sys.path.append("../src")
 
 FILTER_TEST = True
 FILTER_SIZE_TEST = True
@@ -24,7 +24,7 @@ class TestBloomierFilter(unittest.TestCase):
             if key in bloom and bloomier.get(key) != None:
                 return bloomier.get(key)
 
-        return None # it literally doesn't exist. 
+        return None # it literally doesn't exist.
 
 
     def tryInserting(self, bloomiers, blooms, seeds, key, keysDict, m,  k, q):
@@ -33,7 +33,7 @@ class TestBloomierFilter(unittest.TestCase):
         for i, bloom in enumerate(blooms):
             bloomier = bloomiers[i]
             # this is the case that we simply can't do anything about: the key is in the bloom filter and
-            # there is a collision in the bloomier filter. We end early. 
+            # there is a collision in the bloomier filter. We end early.
             if key in bloom and bloomier.get(key) != None:
                 print ("The element " + key + " could not be inserted.")
                 return False # in the future, we can try skipping over the element that can't be inserted
@@ -44,13 +44,13 @@ class TestBloomierFilter(unittest.TestCase):
             elif key not in bloom:
                 if bloomier.insert(key, keysDict[key]):
                     bloom.add(key)
-                    return True 
+                    return True
 
 
         # we haven't already inserted yet, but we didn't break early: it's still possible to insert
         if not inserted:
             if len(bloomiers) >= MAX_BLOOMIER_FILTERS or SEED_INDEX >= MAX_BLOOMIER_FILTERS:
-                # we need to create another bloomier filter, but we're past threshold 
+                # we need to create another bloomier filter, but we're past threshold
                 return False
             else:
                 # we'll create another bloom filter and bloomier filter structure and insert it there
@@ -62,7 +62,7 @@ class TestBloomierFilter(unittest.TestCase):
                 bloomiers.append(bloomier)
                 blooms.append(bloom)
                 SEED_INDEX += 1
-                return True 
+                return True
 
 
 
@@ -72,7 +72,7 @@ class TestBloomierFilter(unittest.TestCase):
         # k
         # q : bit size
 
-        # trial Bloom Filter 
+        # trial Bloom Filter
         f = BloomFilter(capacity=1000, error_rate=0.001)
         [f.add(x) for x in range(10)]
 
@@ -85,7 +85,7 @@ class TestBloomierFilter(unittest.TestCase):
 
         num_elems = 100000
 
-        # set up all the keys we want to test 
+        # set up all the keys we want to test
         keysDict = {}
         for i in range(num_elems):
             keysDict[str(i)] = i
@@ -93,7 +93,7 @@ class TestBloomierFilter(unittest.TestCase):
         values_k = range(2, 16)
         c = 2
 
-      
+
         numInsertions = []
         times = []
         for value_k in values_k:
