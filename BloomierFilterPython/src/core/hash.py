@@ -30,8 +30,13 @@ def getHash(key, hashseed, m, k):
         result.add(value)
 
         if len(result) == k: break
-        assert index < hashedPasswordLength
 
+        
+        if index >= hashedPasswordLength:
+            print (index)
+            print (hashedPasswordLength)
+
+        assert index < hashedPasswordLength
     return list(result)
 
 if __name__ == "__main__":
