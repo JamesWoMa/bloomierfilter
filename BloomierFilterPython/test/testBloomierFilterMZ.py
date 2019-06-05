@@ -4,6 +4,7 @@ import zlib
 from matplotlib import pyplot as plt
 from pybloom import *
 import timeit
+import numpy as np
 sys.path.append("../src")
 
 FILTER_TEST = True
@@ -96,11 +97,13 @@ class TestBloomierFilter(unittest.TestCase):
 
 
         numInsertions = []
+        util_rates = []
+        falses = []
         times = []
         for value_k in values_k:
             start = timeit.default_timer()
 
-            m = int(1000*value_k*c) # # len(k) * 1.5 len(k) * 1.1
+            m = int(10*1000*value_k*c) # # len(k) * 1.5 len(k) * 1.1
             SEED_INDEX = 0
             bloomiers = []
             blooms = []
@@ -113,9 +116,12 @@ class TestBloomierFilter(unittest.TestCase):
             inserted = 0
             final = 0
             for i, key in enumerate(keysDict):
-                if not self.tryInserting(bloomiers, blooms, seeds, key, keysDict, m, value_k, 16):
+                if not bloomier.insert(key, keysDict[key]):
                     final = i
                     break
+                # if not self.tryInserting(bloomiers, blooms, seeds, key, keysDict, m, value_k, 16):
+                #     final = i
+                #     break
                 else:
                     inserted += 1
                 # if inserted % 1000 == 0:
@@ -126,22 +132,45 @@ class TestBloomierFilter(unittest.TestCase):
             for i, key in enumerate(keysDict):
                 if i >= final:
                     break
-                self.assertEqual(self.checkExistence(bloomiers, blooms, key, keysDict), keysDict[key])
+                # self.assertEqual(self.checkExistence(bloomiers, blooms, key, keysDict), keysDict[key])
+                self.assertEqual(bloomier.get(key), keysDict[key])
+
+            util = 0
+            for bloomier in bloomiers:
+                empty = bloomier.getEmptyTable()
+                util += np.sum(np.asarray(empty))
 
 
+            util_rate = (float(util)/(m*MAX_BLOOMIER_FILTERS))
+            util_rates.append(util_rate)
             # false positives
-            for i in range(num_elems, num_elems + 1):
-                self.assertEqual(self.checkExistence(bloomiers, blooms, str(i), i), None)
+            false = 0
 
+            for i in range(final, final + 10000):
+                # if self.checkExistence(bloomiers, blooms, str(i), i) != None:
+                #   false += 1
+                if bloomier.get(str(i)) != None:
+                  false += 1
+                # self.assertEqual(self.checkExistence(bloomiers, blooms, str(i), i), None)
+
+            falses.append(float(false)/10000)
             print (inserted)
             print ("this is length", m)
             numInsertions.append(inserted)
 
-        plt.plot(values_k, numInsertions)
-        plt.title('Number of Insertions Within 10 Bloom-Bloomier Structures')
-        plt.xlabel('k value (number of hash functions); number of buckets is m = 2000*k (both Bloom & Bloomier)')
-        plt.ylabel('Number of Insertions Within 10 Bloom-Bloomier Structures')
-        plt.savefig('linear_k_num_ins_in_10_bloom_bloomier2.png')
+        plt.figure(1)
+        plt.plot(values_k, falses)
+        plt.title('Rate of False Positive for Varying k within Bloomier Filter 10x Size')
+        plt.xlabel('k value (# hash functions)') # buckets is m = 2000*k (both Bloom & Bloomier)
+        plt.ylabel('Rate of False Positives')
+        plt.savefig('linear_k_false_positive_bloomier.png')
+
+        plt.figure(2)
+        plt.plot(values_k, util_rates)
+        plt.title('Utilization of Buckets for Varying k within Bloomier Filter 10x Size')
+        plt.xlabel('k value (# hash functions)') # buckets is m = 2000*k (both Bloom & Bloomier)
+        plt.ylabel('Proportion of Buckets Utilized')
+        plt.savefig('linear_k_util_rate_bloomier.png')
 
 
 if __name__ == "__main__":
